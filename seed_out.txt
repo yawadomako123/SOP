@@ -1,0 +1,23 @@
+Starting comprehensive database seed...
+Cleaning up existing data...
+(node:24968) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Seeding Users...
+- Created User: Admin User (ADMIN)
+- Created User: Manager User (MANAGER)
+- Created User: Cashier User (CASHIER)
+
+Seeding Products...
+- Created 20 Products
+
+Seeding Sales...
+- Created 35 Sales with nested SaleItems
+
+Γ£à Comprehensive Seeding finished successfully.
