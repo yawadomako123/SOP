@@ -1,6 +1,0 @@
-app/cashier/ReceiptDownloader.tsx(6,8): error TS2613: Module '"C:/Users/HP/Desktop/sop-capstone-project/Shoprite/node_modules/@types/qrcode/index"' has no default export. Did you mean to use 'import { QRCode } from "C:/Users/HP/Desktop/sop-capstone-project/Shoprite/node_modules/@types/qrcode/index"' instead?
-app/cashier/ReceiptDownloader.tsx(117,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
-app/cashier/ReceiptDownloader.tsx(118,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
-app/cashier/ReceiptDownloader.tsx(123,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
-app/cashier/ReceiptDownloader.tsx(124,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
-app/cashier/ReceiptDownloader.tsx(126,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.

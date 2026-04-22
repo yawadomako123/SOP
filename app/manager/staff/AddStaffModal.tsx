@@ -47,7 +47,7 @@ export default function AddStaffModal() {
 
   return (
     <>
-      <button 
+      <button
         onClick={openModal}
         className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium"
       >
@@ -55,8 +55,8 @@ export default function AddStaffModal() {
         <span>Add Staff Member</span>
       </button>
 
-      <dialog 
-        ref={dialogRef} 
+      <dialog
+        ref={dialogRef}
         className="backdrop:bg-black/50 backdrop:backdrop-blur-sm 
         p-0 rounded-xl shadow-xl w-full max-w-md bg-card 
         text-card-foreground border border-border fixed inset-0 m-auto"
@@ -64,8 +64,8 @@ export default function AddStaffModal() {
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold">Register New Staff</h2>
-            <button 
-              onClick={closeModal} 
+            <button
+              onClick={closeModal}
               className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-all"
               disabled={isPending}
             >
@@ -94,7 +94,7 @@ export default function AddStaffModal() {
                 placeholder="e.g. Ama Ansah"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-bold text-muted-foreground mb-1.5" htmlFor="email">
                 Email Address
@@ -106,10 +106,10 @@ export default function AddStaffModal() {
                 required
                 disabled={isPending}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary/50 transition-colors placeholder:text-muted-foreground/50"
-                placeholder="ama@shoprite.com"
+                placeholder="ama@EvansCouture.com"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-bold text-muted-foreground mb-1.5" htmlFor="password">
                 Temporary Password

@@ -64,12 +64,12 @@ export default function PrintReportButton({
 
       // Title
       doc.setFontSize(20);
-      doc.text('Shoprite Daily Closing Report', 14, 22);
+      doc.text('EvansCouture Daily Closing Report', 14, 22);
 
       doc.setFontSize(10);
       doc.setTextColor(100);
       doc.text(`Generated on: ${currentDate}`, 14, 30);
-      
+
       let yPos = 40;
 
       // Sales Summary
@@ -92,14 +92,14 @@ export default function PrintReportButton({
         headStyles: { fillColor: [41, 128, 185] },
         margin: { top: 10 },
       });
-      
+
       yPos = (doc as any).lastAutoTable.finalY + 15;
 
       // Payment Methods Breakdown
       doc.setFontSize(14);
       doc.text('Payment Methods Breakdown', 14, yPos);
       yPos += 6;
-      
+
       autoTable(doc, {
         startY: yPos,
         head: [['Method', 'Transactions', 'Total Amount']],
@@ -197,7 +197,7 @@ export default function PrintReportButton({
   };
 
   return (
-    <button 
+    <button
       onClick={generatePDF}
       disabled={isGenerating}
       className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors border border-border disabled:opacity-50"

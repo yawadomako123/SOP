@@ -1,7 +1,0 @@
-.next/dev/types/validator.ts(152,39): error TS2306: File 'C:/Users/HP/Desktop/sop-capstone-project/Shoprite/app/manager/dashboard/page.tsx' is not a module.
-components/ui/resizable.tsx(12,51): error TS2339: Property 'PanelGroup' does not exist on type 'typeof import("C:/Users/HP/Desktop/sop-capstone-project/Shoprite/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
-components/ui/resizable.tsx(14,25): error TS2339: Property 'PanelGroup' does not exist on type 'typeof import("C:/Users/HP/Desktop/sop-capstone-project/Shoprite/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
-components/ui/resizable.tsx(35,51): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("C:/Users/HP/Desktop/sop-capstone-project/Shoprite/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
-components/ui/resizable.tsx(39,25): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("C:/Users/HP/Desktop/sop-capstone-project/Shoprite/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
-components/ui/resizable.tsx(52,26): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("C:/Users/HP/Desktop/sop-capstone-project/Shoprite/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
-components/ui/sidebar.tsx(8,29): error TS2307: Cannot find module '@/hooks/use-mobile' or its corresponding type declarations.

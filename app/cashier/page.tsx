@@ -301,7 +301,7 @@ export default function CashierPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             amount: total,
-            email: (session?.user as any)?.email || 'customer@shoprite.com',
+            email: (session?.user as any)?.email || 'customer@EvansCouture.com',
             saleReference: `sale_${Date.now()}`,
             items: cart.map((item) => ({
               productId: item.product.id,
@@ -383,7 +383,7 @@ export default function CashierPage() {
       {/* Header */}
       <div className="bg-primary text-primary-foreground px-6 py-4 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold">{"🛒"}Shoprite - Cashier</h1>
+          <h1 className="text-xl font-bold">{"🛒"}EvansCouture - Cashier</h1>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-lg">
@@ -489,7 +489,7 @@ export default function CashierPage() {
             <button
               onClick={() => router.push('/cashier/transactions')}
               className="w-full flex items-center justify-between px-4 py-3 bg-card border border-border hover:border-primary hover:shadow-sm rounded-xl transition-all group"
-              //style={{ backgroundColor: '#D0D6B5' }}
+            //style={{ backgroundColor: '#D0D6B5' }}
             >
               <div className="flex items-center gap-3 ">
                 <div className="p-2 bg-/10 rounded-lg text-primary group-hover:scale-105 transition-transform">

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: email || 'customer@shoprite.com',
+        email: email || 'customer@EvansCouture.com',
         amount: Math.round(amount * 100), // Paystack uses pesewas
         reference: saleReference,
         currency: 'GHS',

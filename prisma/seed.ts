@@ -24,9 +24,9 @@ const productsData = [
 ];
 
 const usersData = [
-  { id: 'USR-ADMIN', name: 'Admin User', email: 'admin@shoprite.com', role: 'ADMIN' as const, emailVerified: true },
-  { id: 'USR-MANAGER', name: 'Manager User', email: 'manager@shoprite.com', role: 'MANAGER' as const, emailVerified: true },
-  { id: 'USR-CASHIER', name: 'Cashier User', email: 'cashier@shoprite.com', role: 'CASHIER' as const, emailVerified: true }
+  { id: 'USR-ADMIN', name: 'Admin User', email: 'admin@EvansCouture.com', role: 'ADMIN' as const, emailVerified: true },
+  { id: 'USR-MANAGER', name: 'Manager User', email: 'manager@EvansCouture.com', role: 'MANAGER' as const, emailVerified: true },
+  { id: 'USR-CASHIER', name: 'Cashier User', email: 'cashier@EvansCouture.com', role: 'CASHIER' as const, emailVerified: true }
 ];
 
 async function main() {
@@ -37,7 +37,7 @@ async function main() {
   await prisma.saleItem.deleteMany({});
   await prisma.sale.deleteMany({});
   await prisma.product.deleteMany({});
-  
+
   // NOTE: Better-Auth users might have Cascade relations to Session/Account, but we'll try standard delete
   // We'll just delete the 3 specific users we create to avoid destroying real accounts if any existed
   await prisma.user.deleteMany({
@@ -69,7 +69,7 @@ async function main() {
   const pastDays = 7;
   const numSales = 35; // Generate 35 sales over the last 7 days
   const now = new Date();
-  
+
   // Only Cashier and Manager should make sales usually
   const saleUsers = [createdUsers[1], createdUsers[2]];
 
@@ -79,17 +79,17 @@ async function main() {
     // Generate a random date within the last 7 days
     const randomDaysAgo = Math.random() * pastDays;
     const saleDate = new Date(now.getTime() - randomDaysAgo * 24 * 60 * 60 * 1000);
-    
+
     // Pick a random user
     const randomUser = saleUsers[Math.floor(Math.random() * saleUsers.length)];
 
     // Determine how many items in this sale (1 to 4)
     const numItems = Math.floor(Math.random() * 4) + 1;
-    
+
     // Pick random products for the sale
     const saleItems = [];
     let totalAmount = 0;
-    
+
     // We'll shuffle the products array to pick random distinct ones
     const shuffledProducts = [...createdProducts].sort(() => 0.5 - Math.random());
     const selectedProducts = shuffledProducts.slice(0, numItems);

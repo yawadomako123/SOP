@@ -20,7 +20,7 @@ export default function ReceiptDownloader({ completedSaleData, onDone }: Props) 
     // Header
     doc.setFontSize(22);
     doc.setFont('helvetica', 'bold');
-    doc.text('Shoprite', 74, 20, { align: 'center' });
+    doc.text('EvansCouture', 74, 20, { align: 'center' });
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -97,20 +97,20 @@ export default function ReceiptDownloader({ completedSaleData, onDone }: Props) 
         doc.setFontSize(9);
         doc.setFont('helvetica', 'italic');
         doc.text('Pay with MoMo, Card or Bank — scan or visit the link above', 74, finalY + 134, { align: 'center' });
-        doc.text('Thank you for shopping at Shoprite!', 74, finalY + 141, { align: 'center' });
+        doc.text('Thank you for shopping at EvansCouture!', 74, finalY + 141, { align: 'center' });
       } catch (err) {
         console.error('QR generation failed:', err);
         doc.setFontSize(10);
         doc.setFont('helvetica', 'italic');
-        doc.text('Thank you for shopping at Shoprite!', 74, finalY + 45, { align: 'center' });
+        doc.text('Thank you for shopping at EvansCouture!', 74, finalY + 45, { align: 'center' });
       }
     } else {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'italic');
-      doc.text('Thank you for shopping at Shoprite!', 74, finalY + 45, { align: 'center' });
+      doc.text('Thank you for shopping at EvansCouture!', 74, finalY + 45, { align: 'center' });
     }
 
-    doc.save('Shoprite_receipt.pdf');
+    doc.save('EvansCouture_receipt.pdf');
   };
 
   return (
