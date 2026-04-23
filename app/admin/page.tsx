@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import {
   ShoppingBag, Package, Users, Receipt,
-  AlertCircle, TrendingUp, Clock, CheckCircle, XCircle,
-  ArrowUpRight, ArrowDownRight, Activity, Zap
+  AlertCircle, TrendingUp, Clock, CheckCircle,
+  ArrowUpRight, ArrowDownRight, Activity, Zap, Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,166 +71,180 @@ export default async function DashboardPage() {
     {
       label: "Today's Revenue",
       value: `GH₵ ${todayTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-      sub: `${todayCount} successful checkout${todayCount !== 1 ? 's' : ''}`,
+      sub: `${todayCount} transaction${todayCount !== 1 ? 's' : ''} today`,
       icon: ShoppingBag,
-      variant: 'primary',
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+      border: 'border-primary/15',
       trend: '+12.5%',
-      trendUp: true
+      trendUp: true,
     },
     {
-      label: 'Inventory Assets',
+      label: 'Inventory',
       value: productsCount.toString(),
-      sub: `${lowStockProducts.length} items require restock`,
+      sub: `${lowStockProducts.length} items need restock`,
       icon: Package,
-      variant: 'indigo',
-      trend: '0.4%',
-      trendUp: true
+      color: 'text-blue-400',
+      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/15',
+      trend: 'Stable',
+      trendUp: null,
     },
     {
-      label: 'Staff Activity',
+      label: 'Staff',
       value: usersCount.toString(),
       sub: 'Active platform operators',
       icon: Users,
-      variant: 'slate',
+      color: 'text-violet-400',
+      bg: 'bg-violet-500/10',
+      border: 'border-violet-500/15',
       trend: 'Stable',
-      trendUp: null
+      trendUp: null,
     },
     {
-      label: 'System Lifetime',
+      label: 'All-Time Revenue',
       value: `GH₵ ${allTimeTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-      sub: `${pendingSales} payments awaiting verification`,
+      sub: `${pendingSales} payment${pendingSales !== 1 ? 's' : ''} pending`,
       icon: Activity,
-      variant: 'primary',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10',
+      border: 'border-emerald-500/15',
       trend: '+4.2%',
-      trendUp: true
+      trendUp: true,
     },
   ];
 
-  const statusBadge = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <Badge variant="outline" className="bg-emerald-500/5 text-emerald-500 border-emerald-500/20 text-[10px] font-bold uppercase tracking-wider">Verified</Badge>;
-      case 'pending':
-        return <Badge variant="outline" className="bg-amber-500/5 text-amber-500 border-amber-500/20 text-[10px] font-bold uppercase tracking-wider">Awaiting</Badge>;
-      default:
-        return <Badge variant="outline" className="bg-destructive/5 text-destructive border-destructive/20 text-[10px] font-bold uppercase tracking-wider">Registry Error</Badge>;
-    }
+  const methodLabel: Record<string, string> = {
+    cash: 'Cash Payment',
+    card: 'Card Payment',
+    mobile: 'Mobile Money',
   };
 
-  const methodLabel: Record<string, string> = {
-    cash: 'Fiat / Cash',
-    card: 'Digital Card',
-    mobile: 'Mobile Wallet',
+  const methodIcon: Record<string, string> = {
+    cash: '💵',
+    card: '💳',
+    mobile: '📱',
   };
 
   return (
-    <div className="space-y-10 pb-10">
-      {/* Welcome Section */}
+    <div className="space-y-8 pb-8">
+      {/* Page header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-2">
-            <Zap className="size-3 fill-primary" /> System Overview
-          </div>
-          <h1 className="text-4xl font-display font-extrabold tracking-tight">Executive Terminal</h1>
-          <p className="text-muted-foreground font-medium mt-1">
-            Real-time analytics for{' '}
-            <span className="text-foreground font-semibold">
-              {new Date().toLocaleDateString('en-GH', {
-                weekday: 'long', month: 'long', day: 'numeric',
-              })}
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="size-3.5 text-primary fill-primary" />
+            <span className="text-primary font-bold text-xs uppercase tracking-[0.3em]">
+              System Overview
             </span>
+          </div>
+          <h1 className="text-3xl font-display font-extrabold tracking-tight mb-1">
+            Executive Dashboard
+          </h1>
+          <p className="text-muted-foreground text-sm font-medium">
+            {new Date().toLocaleDateString('en-GH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" size="sm" className="rounded-xl font-bold px-4">
-            Custom Range
-          </Button>
-          <Button size="sm" className="rounded-xl font-bold px-4 shadow-lg shadow-primary/20">
+          <Button variant="outline" size="sm" className="rounded-xl font-semibold h-9 px-4 border-border/60">
             Export Report
+          </Button>
+          <Button size="sm" className="rounded-xl font-bold h-9 px-4 bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90">
+            View Analytics
           </Button>
         </div>
       </div>
 
-      {/* Stats Cluster */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* KPI Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.label} className="glass group hover:border-primary/30 transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-2xl ${
-                    stat.variant === 'primary' ? 'bg-primary/10 text-primary' : 
-                    stat.variant === 'indigo' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-slate-500/10 text-slate-500'
-                  }`}>
-                    <Icon className="size-5" />
+            <div
+              key={stat.label}
+              className={`card-hover relative bg-card border border-border/50 rounded-2xl p-6 overflow-hidden`}
+            >
+              {/* Subtle glow accent */}
+              <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} rounded-full blur-2xl opacity-40 -translate-y-8 translate-x-8`} />
+
+              <div className="relative">
+                <div className="flex items-start justify-between mb-5">
+                  <div className={`p-2.5 rounded-xl ${stat.bg} border ${stat.border}`}>
+                    <Icon className={`size-5 ${stat.color}`} />
                   </div>
                   {stat.trend !== 'Stable' && (
-                    <div className={`flex items-center gap-1 text-xs font-bold ${stat.trendUp ? 'text-emerald-500' : 'text-amber-500'}`}>
-                      {stat.trend} {stat.trendUp ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
+                    <div className={`flex items-center gap-1 text-xs font-bold ${stat.trendUp ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      {stat.trend}
+                      {stat.trendUp ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
                     </div>
                   )}
+                  {stat.trend === 'Stable' && (
+                    <span className="text-xs font-bold text-muted-foreground/60">Stable</span>
+                  )}
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-2xl font-display font-bold tracking-tight group-hover:text-primary transition-colors">{stat.value}</h3>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">{stat.label}</p>
-                  <p className="text-xs font-medium text-muted-foreground pt-2 border-t border-border/40 mt-3">{stat.sub}</p>
-                </div>
-              </CardContent>
-            </Card>
+                <p className="text-2xl font-display font-black tracking-tight mb-1">{stat.value}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3">{stat.label}</p>
+                <div className="gold-divider mb-3" />
+                <p className="text-xs text-muted-foreground font-medium">{stat.sub}</p>
+              </div>
+            </div>
           );
         })}
       </div>
 
-      {/* Data Visualization & Monitoring */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Flows */}
-        <Card className="lg:col-span-2 glass overflow-hidden border-border/40 shadow-xl">
-          <CardHeader className="flex flex-row items-center justify-between bg-secondary/30 px-6 py-4">
-            <div className="space-y-0.5">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <Receipt className="size-4 text-primary" /> Transaction Stream
+      {/* Main content grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Transaction stream */}
+        <Card className="lg:col-span-2 border-border/50 shadow-sm overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between px-6 py-4 border-b border-border/40 bg-secondary/20">
+            <div>
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <Receipt className="size-4 text-primary" />
+                Recent Transactions
               </CardTitle>
-              <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Verified Settlement Ledger</CardDescription>
+              <CardDescription className="text-[10px] font-semibold uppercase tracking-wider opacity-50 mt-0.5">
+                Settlement Ledger
+              </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" asChild className="rounded-lg text-xs font-bold">
-              <Link href="/admin/reports">Audit History</Link>
+            <Button variant="ghost" size="sm" asChild className="rounded-lg text-xs font-bold h-8">
+              <Link href="/admin/reports">View All</Link>
             </Button>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y divide-border/40">
+            <div className="divide-y divide-border/30">
               {recentSales.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                  <Receipt className="size-12 text-muted-foreground/20 mb-4" />
-                  <p className="text-sm font-semibold text-muted-foreground">The settlement ledger is currently empty</p>
+                <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                  <Receipt className="size-10 text-muted-foreground/15 mb-3" />
+                  <p className="text-sm font-semibold text-muted-foreground/50">No transactions yet</p>
                 </div>
               ) : (
                 recentSales.map((sale: any) => (
                   <div
                     key={sale.id}
-                    className="flex items-center justify-between px-6 py-4 hover:bg-primary/5 transition-all group"
+                    className="flex items-center justify-between px-6 py-3.5 hover:bg-primary/5 transition-all group"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="size-10 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                        <ShoppingBag className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <div className="size-9 rounded-xl bg-secondary/80 border border-border/40 flex items-center justify-center text-lg group-hover:bg-primary/10 transition-colors">
+                        {methodIcon[sale.paymentMethod] ?? '💰'}
                       </div>
                       <div>
-                        <p className="text-sm font-bold tracking-tight">
+                        <p className="text-sm font-bold">
                           {methodLabel[sale.paymentMethod] ?? sale.paymentMethod}
                         </p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">
-                          {new Date(sale.createdAt).toLocaleTimeString('en-GH', {
-                            hour: '2-digit', minute: '2-digit',
-                          })}
-                          {' '}· {sale.user?.name ? `${sale.user.name}` : 'Terminal'}
+                        <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider mt-0.5">
+                          {new Date(sale.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}
+                          {' · '}{sale.user?.name || 'Terminal'}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right flex flex-col items-end gap-2">
-                      <p className="text-sm font-black text-foreground">
+                    <div className="text-right flex flex-col items-end gap-1.5">
+                      <p className="text-sm font-black">
                         GH₵ {sale.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </p>
-                      {statusBadge(sale.paymentStatus)}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        sale.paymentStatus === 'paid' ? 'status-paid' : 'status-pending'
+                      }`}>
+                        {sale.paymentStatus === 'paid' ? 'Verified' : 'Pending'}
+                      </span>
                     </div>
                   </div>
                 ))
@@ -239,39 +253,42 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Asset Alerts */}
-        <Card className="glass border-border/40 shadow-xl">
-          <CardHeader className="bg-secondary/30 px-6 py-4">
-            <CardTitle className="text-lg font-bold flex items-center gap-2">
-              <AlertCircle className="size-4 text-destructive" /> Low Stock
+        {/* Low stock */}
+        <Card className="border-border/50 shadow-sm overflow-hidden">
+          <CardHeader className="px-6 py-4 border-b border-border/40 bg-secondary/20">
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <AlertCircle className="size-4 text-destructive" />
+              Low Stock
             </CardTitle>
-            <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">Inventory Depletion Warnings</CardDescription>
+            <CardDescription className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
+              Inventory Alerts
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y divide-border/40">
+            <div className="divide-y divide-border/30">
               {lowStockProducts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                  <CheckCircle className="size-12 text-emerald-500/20 mb-4" />
-                  <p className="text-sm font-semibold text-muted-foreground">All inventory channels optimized</p>
+                <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                  <CheckCircle className="size-10 text-emerald-400/20 mb-3" />
+                  <p className="text-sm font-semibold text-muted-foreground/50">All stock levels good</p>
                 </div>
               ) : (
                 lowStockProducts.map((product: any) => (
                   <div
                     key={product.id}
-                    className="flex items-center justify-between px-6 py-4 hover:bg-destructive/5 transition-all group"
+                    className="flex items-center justify-between px-5 py-3.5 hover:bg-destructive/5 transition-all group"
                   >
-                    <div className="min-w-0 pr-4">
+                    <div className="min-w-0 pr-3">
                       <p className="text-sm font-bold truncate group-hover:text-destructive transition-colors">{product.name}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5 truncate">{product.category?.name}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mt-0.5 truncate">
+                        {product.category?.name}
+                      </p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <div className={`text-xs font-black p-1.5 px-3 rounded-lg border-2 ${
-                        product.quantity === 0 
-                        ? 'bg-destructive/10 text-destructive border-destructive/20' 
-                        : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                      }`}>
-                        {product.quantity} Units
-                      </div>
+                    <div className={`shrink-0 text-xs font-black px-2.5 py-1 rounded-lg border ${
+                      product.quantity === 0
+                        ? 'bg-destructive/10 text-destructive border-destructive/20'
+                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                    }`}>
+                      {product.quantity} left
                     </div>
                   </div>
                 ))
@@ -279,8 +296,8 @@ export default async function DashboardPage() {
             </div>
             {lowStockProducts.length > 0 && (
               <div className="p-4 border-t border-border/40">
-                <Button variant="outline" className="w-full text-xs font-bold rounded-xl border-destructive/20 hover:bg-destructive/5 hover:text-destructive transition-all" asChild>
-                  <Link href="/admin/inventory">Initialize Restock</Link>
+                <Button variant="outline" className="w-full text-xs font-bold rounded-xl h-9 border-destructive/20 hover:bg-destructive/5 hover:text-destructive" asChild>
+                  <Link href="/admin/inventory">Restock Inventory</Link>
                 </Button>
               </div>
             )}
@@ -288,42 +305,50 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Strategic Performance */}
-      <Card className="glass border-border/40 shadow-xl overflow-hidden">
-        <CardHeader className="bg-secondary/30 px-6 py-4 flex flex-row items-center justify-between">
-          <div className="space-y-0.5">
-            <CardTitle className="text-lg font-bold flex items-center gap-2">
-              <TrendingUp className="size-4 text-primary" /> Alpha Performance
+      {/* Top Products */}
+      <Card className="border-border/50 shadow-sm overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between px-6 py-4 border-b border-border/40 bg-secondary/20">
+          <div>
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <TrendingUp className="size-4 text-primary" />
+              Top Performing Products
             </CardTitle>
-            <CardDescription className="text-xs font-medium uppercase tracking-wider opacity-60">High Velocity Product Index</CardDescription>
+            <CardDescription className="text-[10px] font-semibold uppercase tracking-wider opacity-50 mt-0.5">
+              Highest Volume Index
+            </CardDescription>
           </div>
-          <Button variant="ghost" size="sm" asChild className="rounded-lg text-xs font-bold">
-            <Link href="/admin/products">Manifest Full List</Link>
+          <Button variant="ghost" size="sm" asChild className="rounded-lg text-xs font-bold h-8">
+            <Link href="/admin/products">View All</Link>
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           {topProducts.length === 0 ? (
-            <div className="py-20 text-center">
-              <p className="text-sm font-semibold text-muted-foreground opacity-50">Accumulating velocity data...</p>
+            <div className="py-16 text-center">
+              <p className="text-sm font-semibold text-muted-foreground/40">No data yet</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/40">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/30">
               {topProducts.map((item: any, i: number) => {
                 const product = topProductMap[item.productId];
                 if (!product) return null;
                 return (
-                  <div key={item.productId} className="flex items-center gap-4 px-6 py-6 group hover:bg-primary/5 transition-all">
-                    <div className="size-12 rounded-2xl bg-secondary border border-border/40 flex items-center justify-center font-black text-lg shrink-0 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-transparent transition-all duration-300">
+                  <div key={item.productId} className="flex items-center gap-4 px-6 py-5 group hover:bg-primary/5 transition-all">
+                    <div className="size-11 rounded-2xl bg-secondary/60 border border-border/40 flex items-center justify-center font-black text-base shrink-0 text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-transparent transition-all duration-300">
                       {i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold group-hover:text-primary transition-colors truncate">{product.name}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5 truncate">{product.category?.name}</p>
-                      <div className="flex items-center gap-2 mt-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mt-0.5 truncate">
+                        {product.category?.name}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2.5">
                         <div className="h-1 flex-1 bg-secondary rounded-full overflow-hidden">
-                          <div className="h-full bg-primary" style={{ width: `${Math.min(100, (item._sum.quantity || 0) * 5)}%` }} />
+                          <div
+                            className="h-full bg-primary rounded-full transition-all"
+                            style={{ width: `${Math.min(100, (item._sum.quantity || 0) * 5)}%` }}
+                          />
                         </div>
-                        <span className="text-[10px] font-black">{item._sum.quantity} Sold</span>
+                        <span className="text-[10px] font-black text-muted-foreground">{item._sum.quantity} sold</span>
                       </div>
                     </div>
                   </div>

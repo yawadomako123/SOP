@@ -29,10 +29,10 @@ const fontMono = IBM_Plex_Mono({
 
 
 export const metadata: Metadata = {
-  title: "SOP Platform",
-  description: "Advanced Point of Sale System",
+  title: "Evan's Couture",
+  description: "Luxury Fashion Point of Sale — Crafted for Excellence",
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>",
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>",
   },
 };
 

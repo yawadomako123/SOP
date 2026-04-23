@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from '@/lib/auth-client';
-import { Search, Scan, ShoppingCart, CreditCard, Trash2, Plus, Minus, LogOut, User, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Search, Scan, ShoppingCart, CreditCard, Trash2, Plus, Minus, LogOut, User, CheckCircle, Clock, XCircle, Sparkles, Package, ChevronRight, Banknote, Smartphone, ArrowRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useHardwareScanner } from '@/components/hooks/useHardwareScanner';
@@ -44,7 +44,10 @@ interface Toast {
   type: 'success' | 'info';
 }
 
+type PaymentStep = 'method' | 'confirm' | 'receipt';
+
 export default function CashierPage() {
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>('method');
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [barcode, setBarcode] = useState("");
@@ -245,11 +248,13 @@ export default function CashierPage() {
   const handleCheckout = () => {
     if (cart.length > 0) {
       setCompletedSaleData(null);
+      setPaymentStep('method');
       setShowPaymentModal(true);
     }
   };
 
   const handlePaymentComplete = async () => {
+    setPaymentStep('confirm');
     if (isProcessing) return;
     setIsProcessing(true);
     try {
@@ -288,7 +293,7 @@ export default function CashierPage() {
           paystackUrl: null,
           date: new Date().toLocaleString(),
         });
-
+        setPaymentStep('receipt');
         setCart([]);
         const productsRes = await fetch('/api/products');
         if (productsRes.ok) {
@@ -334,7 +339,7 @@ export default function CashierPage() {
           paymentVerified: false,
           date: new Date().toLocaleString(),
         });
-
+        setPaymentStep('receipt');
         setCart([]);
         // Do NOT refresh products here — stock is not decremented until verified
       }
@@ -356,16 +361,28 @@ export default function CashierPage() {
     });
   };
 
+  const paymentMethodIcon = {
+    cash: <Banknote className="w-6 h-6" />,
+    card: <CreditCard className="w-6 h-6" />,
+    mobile: <Smartphone className="w-6 h-6" />,
+  };
+  const paymentMethodLabel = { cash: 'Cash', card: 'Card / POS', mobile: 'Mobile Money' };
+
   if (isPending || !session) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="size-14 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center animate-pulse">
+            <Sparkles className="size-6 text-primary" />
+          </div>
+          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">Loading Terminal...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col bg-background dark">
 
       {/* Toast Notifications */}
       <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
@@ -380,23 +397,30 @@ export default function CashierPage() {
         ))}
       </div>
 
-      {/* Header */}
-      <div className="bg-primary text-primary-foreground px-6 py-4 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold">{"🛒"}EvansCouture - Cashier</h1>
+      {/* Premium Header */}
+      <div className="bg-card text-foreground px-6 py-4 flex items-center justify-between border-b border-border/40 relative z-10 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="size-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center glow-primary">
+            <Sparkles className="size-5 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display font-bold text-sm tracking-tight text-foreground">Evan's Couture</span>
+            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Point of Sale</span>
+          </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-lg">
-            <User className="w-4 h-4" />
-            <span>Cashier Mode</span>
+          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-secondary/50 rounded-xl border border-border/50">
+            <User className="w-4 h-4 text-primary" />
+            <span className="text-xs font-semibold">{session?.user?.name || 'Cashier'}</span>
           </div>
           <ThemeToggle />
+          <div className="w-px h-5 bg-border/50 hidden md:block" />
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors text-white"
+            className="flex items-center gap-2 px-4 py-2 hover:bg-destructive/10 text-destructive rounded-xl transition-colors font-semibold text-sm"
           >
             <LogOut className="w-4 h-4" />
-            <span>Logout</span>
+            <span>End Session</span>
           </button>
         </div>
       </div>
@@ -405,78 +429,86 @@ export default function CashierPage() {
         {/* Left Panel - Products */}
         <div className="flex-1 flex flex-col p-6 overflow-hidden">
           {/* Search and Barcode */}
-          <div className="mb-4 space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <div className="mb-6 space-y-3">
+            <div className="relative group">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search products..."
-                className="w-full pl-11 pr-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Search catalog..."
+                className="w-full pl-10 pr-4 h-11 bg-card border-border/50 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-sm"
               />
             </div>
             <form onSubmit={handleBarcodeSearch} className="flex gap-2">
-              <div className="relative flex-1">
-                <Scan className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <div className="relative flex-1 group">
+                <Scan className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <input
                   type="text"
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
-                  placeholder="Scan or enter barcode..."
-                  className="w-full pl-11 pr-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Scan or enter SKU..."
+                  className="w-full pl-10 pr-4 h-11 bg-card border-border/50 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-sm font-mono"
                 />
               </div>
               <button
                 type="submit"
-                className="px-6 py-3 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
+                className="px-6 h-11 bg-secondary text-secondary-foreground font-semibold rounded-xl hover:bg-secondary/80 transition-colors border border-border/50"
               >
                 Add
               </button>
               <BarcodeScanner
                 onScan={(code) => { handleBarcodeValue(code); }}
                 buttonVariant="icon"
-                buttonClassName="px-3 py-3 bg-secondary hover:bg-secondary/80 rounded-lg"
+                buttonClassName="h-11 w-11 flex items-center justify-center bg-secondary hover:bg-secondary/80 rounded-xl border border-border/50"
               />
             </form>
           </div>
 
           {/* Product Grid */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-4">
             {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-muted-foreground">Loading products...</p>
+              <div className="flex flex-col items-center justify-center h-full gap-4">
+                <div className="size-10 rounded-xl border border-primary/20 border-t-primary animate-spin" />
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Loading Catalog</p>
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-muted-foreground">No products found</p>
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
+                <div className="size-16 rounded-2xl bg-secondary/50 flex items-center justify-center text-muted-foreground/50 mb-2">
+                  <Package className="size-8" />
+                </div>
+                <p className="font-semibold">No items found</p>
+                <p className="text-sm text-muted-foreground max-w-[200px]">Try a different search term or scan a new SKU.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-3">
                 {filteredProducts.map((product) => (
                   <button
                     key={product.id}
                     onClick={() => addToCart(product)}
                     disabled={product.quantity <= 0}
-                    className="bg-card border border-border rounded-lg p-4 hover:border-primary hover:shadow-md transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="group relative flex flex-col items-start p-4 bg-card hover:bg-accent/50 border border-border/50 rounded-2xl text-left transition-all hover:border-primary/30 hover:shadow-[0_8px_24px_-12px_rgba(201,168,76,0.2)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-border/50 disabled:hover:bg-card disabled:hover:shadow-none h-[140px]"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="truncate mb-1 font-medium">
-                          {product.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
+                    <div className="flex justify-between items-start w-full mb-auto">
+                      <div className="p-2 rounded-lg bg-secondary/50 text-muted-foreground group-hover:text-primary transition-colors">
+                        <Package className="size-5" />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70">
+                        GH₵ {product.price.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="w-full">
+                      <h3 className="font-bold text-sm leading-tight mb-1 truncate text-foreground group-hover:text-primary transition-colors">
+                        {product.name}
+                      </h3>
+                      <div className="flex items-center justify-between w-full">
+                        <p className="text-xs text-muted-foreground truncate max-w-[100px]">
                           {product.category}
                         </p>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${product.quantity <= 5 ? 'bg-destructive/10 text-destructive' : 'bg-secondary text-muted-foreground'}`}>
+                          {product.quantity} left
+                        </span>
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="font-semibold text-primary">
-                        GH₵ {product.price.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Stock: {product.quantity}
-                      </p>
                     </div>
                   </button>
                 ))}
@@ -508,62 +540,60 @@ export default function CashierPage() {
         </div>
 
         {/* Right Panel - Cart */}
-        <div className="w-105 bg-card border-l border-border flex flex-col">
-          <div className="px-6 py-4 border-b border-border">
-            <h2 className="font-bold text-lg">Current Order</h2>
-            <p className="text-sm text-muted-foreground">
-              {cart.length} item(s)
+        <div className="w-[420px] bg-secondary/10 border-l border-border/40 flex flex-col relative z-10 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.2)]">
+          <div className="px-6 py-5 border-b border-border/40 bg-card/50 backdrop-blur-sm">
+            <h2 className="font-display font-bold text-xl mb-1">Current Order</h2>
+            <p className="text-xs font-semibold text-primary uppercase tracking-widest">
+              {cart.length} item{cart.length !== 1 && 's'}
             </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 custom-scrollbar">
             {cart.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <ShoppingCart className="w-12 h-12 text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">Cart is empty</p>
-                <p className="text-sm text-muted-foreground">
-                  Add products to start a sale
-                </p>
+                <div className="size-20 rounded-full border border-border/50 flex items-center justify-center mb-4 text-muted-foreground/30">
+                  <ShoppingCart className="w-8 h-8" />
+                </div>
+                <p className="font-medium text-muted-foreground">Cart is empty</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Select items from the catalog</p>
               </div>
             ) : (
               cart.map((item) => (
                 <div
                   key={item.product.id}
-                  className="bg-background border border-border rounded-lg p-3"
+                  className="bg-card border border-border/50 rounded-2xl p-4 shadow-sm group hover:border-primary/20 transition-colors"
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1 min-w-0 mr-2">
-                      <h4 className="truncate font-medium">
-                        {item.product.name}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 min-w-0 mr-3">
+                      <h4 className="font-bold text-sm truncate">{item.product.name}</h4>
+                      <p className="text-[11px] font-semibold text-primary/80 uppercase tracking-widest mt-0.5">
                         GH₵ {item.product.price.toFixed(2)}
                       </p>
                     </div>
                     <button
                       onClick={() => removeFromCart(item.product.id)}
-                      className="text-destructive hover:bg-destructive/10 p-1 rounded"
+                      className="text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 p-1.5 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 bg-secondary rounded-lg p-1 border border-border/50">
                       <button
                         onClick={() => updateQuantity(item.product.id, -1)}
-                        className="w-7 h-7 flex items-center justify-center bg-secondary hover:bg-secondary/80 rounded"
+                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm text-foreground transition-all"
                       >
-                        <Minus className="w-4 h-4" />
+                        <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="w-8 text-center">{item.quantity}</span>
+                      <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.product.id, 1)}
-                        className="w-7 h-7 flex items-center justify-center bg-secondary hover:bg-secondary/80 rounded"
+                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm text-foreground transition-all"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <p className="font-semibold">
+                    <p className="font-bold text-[15px]">
                       GH₵ {(item.product.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
@@ -572,167 +602,153 @@ export default function CashierPage() {
             )}
           </div>
 
-          <div className="border-t border-border px-6 py-4 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span>GH₵ {subtotal.toFixed(2)}</span>
+          <div className="border-t border-border/40 bg-card/50 backdrop-blur-sm px-6 py-5">
+            <div className="space-y-2 mb-5">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground font-medium">Subtotal</span>
+                <span className="font-semibold">GH₵ {subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground font-medium">Tax (12.5%)</span>
+                <span className="font-semibold">GH₵ {tax.toFixed(2)}</span>
+              </div>
+              <div className="gold-divider my-2" />
+              <div className="flex justify-between items-center">
+                <span className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Total</span>
+                <span className="font-display font-bold text-primary text-2xl">
+                  GH₵ {total.toFixed(2)}
+                </span>
+              </div>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Tax (12.5%)</span>
-              <span>GH₵ {tax.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between pt-3 border-t border-border">
-              <span className="font-semibold">Total</span>
-              <span className="font-semibold text-primary text-lg">
-                GH₵ {total.toFixed(2)}
-              </span>
-            </div>
+            
             <button
               onClick={handleCheckout}
               disabled={cart.length === 0}
-              className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold"
+              className="w-full h-12 bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 font-bold group"
             >
-              <CreditCard className="w-5 h-5" />
-              <span>Checkout</span>
+              <span>Proceed to Checkout</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Payment Modal */}
+      {/* Premium Payment Modal */}
       {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card border border-border rounded-lg shadow-lg w-96">
-            {!completedSaleData ? (
-              <>
-                <div className="px-6 py-4 border-b border-border">
-                  <h3 className="text-xl font-bold">Payment Method</h3>
-                </div>
-                <div className="p-6 space-y-4">
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-3 p-3 border border-border rounded-lg cursor-pointer hover:bg-secondary">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="cash"
-                        checked={paymentMethod === "cash"}
-                        onChange={(e) =>
-                          setPaymentMethod(
-                            e.target.value as "cash" | "card" | "mobile",
-                          )
-                        }
-                      />
-                      <span className="font-medium">Cash</span>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 border border-border rounded-lg cursor-pointer hover:bg-secondary">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="card"
-                        checked={paymentMethod === "card"}
-                        onChange={(e) =>
-                          setPaymentMethod(
-                            e.target.value as "cash" | "card" | "mobile",
-                          )
-                        }
-                      />
-                      <span className="font-medium">Card</span>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 border border-border rounded-lg cursor-pointer hover:bg-secondary">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="mobile"
-                        checked={paymentMethod === "mobile"}
-                        onChange={(e) =>
-                          setPaymentMethod(
-                            e.target.value as "cash" | "card" | "mobile",
-                          )
-                        }
-                      />
-                      <span className="font-medium">Mobile Money</span>
-                    </label>
-                  </div>
-                  <div className="pt-4 border-t border-border">
-                    <p className="text-sm text-muted-foreground mb-2 font-semibold">
-                      Total Amount
-                    </p>
-                    <p className="text-3xl font-bold text-primary">
-                      GH₵ {total.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={() => setShowPaymentModal(false)}
-                      className="flex-1 py-2 px-4 border border-border rounded-lg hover:bg-secondary transition-colors font-medium"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handlePaymentComplete}
-                      disabled={isProcessing}
-                      className="flex-1 py-2 px-4 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isProcessing ? 'Processing...' : 'Complete Payment'}
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="p-8 text-center space-y-6">
-                {completedSaleData.paymentMethod === 'cash' ? (
-                  <>
-                    <div className="w-16 h-16 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/20">
-                      <CheckCircle className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">
-                        Payment Successful!
-                      </h3>
-                      <p className="text-muted-foreground font-medium">
-                        The transaction has been safely recorded in the database.
-                      </p>
-                    </div>
-                  </>
-                ) : completedSaleData.paymentVerified ? (
-                  <>
-                    <div className="w-16 h-16 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/20">
-                      <CheckCircle className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">
-                        Payment Confirmed!
-                      </h3>
-                      <p className="text-muted-foreground font-medium">
-                        The payment has been verified and the sale is recorded.
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/20 relative">
-                      <Clock className="w-8 h-8" />
-                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></span>
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">
-                        Awaiting Payment
-                      </h3>
-                      <p className="text-muted-foreground font-medium">
-                        Download the receipt with the payment QR. This screen will update automatically once the customer pays.
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2 animate-pulse">
-                        Checking payment status...
-                      </p>
-                    </div>
-                  </>
-                )}
-                <ReceiptDownloader
-                  completedSaleData={completedSaleData}
-                  onDone={() => setShowPaymentModal(false)}
-                />
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-50 animate-in">
+          <div className="bg-card border border-border/50 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden relative">
+            
+            {/* Header */}
+            <div className="px-8 py-6 border-b border-border/40 flex items-center justify-between bg-secondary/20 relative">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(201,168,76,0.1)_0%,transparent_70%)] pointer-events-none" />
+              <div>
+                <h3 className="text-2xl font-display font-bold text-foreground">Checkout</h3>
+                <p className="text-xs font-semibold text-primary uppercase tracking-widest mt-1">
+                  {paymentStep === 'method' && 'Step 1: Select Payment'}
+                  {paymentStep === 'confirm' && 'Step 2: Processing'}
+                  {paymentStep === 'receipt' && 'Step 3: Receipt'}
+                </p>
               </div>
-            )}
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                disabled={isProcessing}
+                className="p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-8">
+              {paymentStep === 'method' && (
+                <div className="space-y-6 animate-in slide-in-from-right-4">
+                  <div className="grid grid-cols-3 gap-3">
+                    {(['cash', 'card', 'mobile'] as const).map((method) => (
+                      <button
+                        key={method}
+                        onClick={() => setPaymentMethod(method)}
+                        className={`flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border transition-all ${
+                          paymentMethod === method
+                            ? 'bg-primary/10 border-primary text-primary shadow-[0_0_20px_-5px_rgba(201,168,76,0.3)]'
+                            : 'bg-secondary/30 border-border/50 text-muted-foreground hover:bg-secondary/50 hover:border-border'
+                        }`}
+                      >
+                        {paymentMethodIcon[method]}
+                        <span className="text-xs font-bold uppercase tracking-widest">{paymentMethodLabel[method]}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="bg-secondary/30 rounded-2xl p-6 border border-border/50 flex flex-col items-center justify-center space-y-2">
+                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">Amount Due</span>
+                    <span className="text-4xl font-display font-bold text-foreground">GH₵ {total.toFixed(2)}</span>
+                  </div>
+
+                  <button
+                    onClick={handlePaymentComplete}
+                    disabled={isProcessing}
+                    className="w-full h-14 bg-primary text-primary-foreground rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2 font-bold text-lg group relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.2)_50%,transparent_100%)] translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]" />
+                    <span>Confirm Payment</span>
+                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </div>
+              )}
+
+              {paymentStep === 'confirm' && (
+                <div className="py-12 flex flex-col items-center justify-center space-y-6 animate-in slide-in-from-right-4">
+                  <div className="size-20 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                  <div className="text-center space-y-2">
+                    <h3 className="text-xl font-bold">Processing Transaction</h3>
+                    <p className="text-sm text-muted-foreground">Please wait while we secure the payment...</p>
+                  </div>
+                </div>
+              )}
+
+              {paymentStep === 'receipt' && completedSaleData && (
+                <div className="space-y-6 text-center animate-in slide-in-from-bottom-4">
+                  <div className="flex justify-center">
+                    {completedSaleData.paymentMethod === 'cash' || completedSaleData.paymentVerified ? (
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse" />
+                        <div className="size-20 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center border border-emerald-500/30 relative z-10">
+                          <CheckCircle className="w-10 h-10" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl animate-pulse" />
+                        <div className="size-20 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center border border-blue-500/30 relative z-10">
+                          <Clock className="w-10 h-10" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2 text-foreground">
+                      {completedSaleData.paymentMethod === 'cash' 
+                        ? 'Payment Successful' 
+                        : completedSaleData.paymentVerified 
+                          ? 'Payment Confirmed' 
+                          : 'Awaiting Payment'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      {completedSaleData.paymentMethod === 'cash' || completedSaleData.paymentVerified
+                        ? 'The transaction has been safely recorded.'
+                        : 'Download the receipt with the payment QR. This screen will update automatically.'}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-border/40">
+                    <ReceiptDownloader
+                      completedSaleData={completedSaleData}
+                      onDone={() => setShowPaymentModal(false)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
